@@ -7,6 +7,7 @@
  * @link Bitbucket https://confluence.atlassian.com/display/BITBUCKET/issues+Resource#issuesResource-POSTanewissue
  * @version   $Id: repoapi V0.01
  * @created   2014-02-09 20:00:00
+ * @modified  2014-02-13 18:00:00
  */
 
 //include Request Exception class to Handles github and bitbucket Api specific errors
@@ -24,7 +25,7 @@ class OAuthApi {
      * Default options/settings
      * @var string[string]
      */
-    public $options = array	(
+    public $options = array    (
         'protocol' => 'https',
         'github_url' => ':protocol://api.github.com/:path?format=:format',
         'bitbucket_url' => ':protocol://api.bitbucket.org/1.0/:path?format=:format',
@@ -59,9 +60,9 @@ class OAuthApi {
 
     /**
      * Default constructor, paramters takes repository url, username, password of options to instantiate and merge options from possible overrides
-     * @param		string		$api_url		The Api url that dictates which API and event to use
-     * @param		string		$username		The API username
-     * @param		string		$password		The API password
+     * @param       string     $api_url     The Api url that dictates which API and event to use
+     * @param       string     $username    The API username
+     * @param       string     $password    The API password
      */
     public function __construct($api_url = null, $username = null, $password = null) {
         $options = array(
@@ -79,8 +80,8 @@ class OAuthApi {
 
     /**
      * Merges/Configures the passed-in options with the default options
-     * @param		array		$options		Passed-in options to be merged with the class defaults
-     * @return 		github|bitbucket\api\Request
+     * @param       array       $options        Passed-in options to be merged with the class defaults
+     * @return      github|bitbucket\api\Request
      */
     public function configure(array $options) {
         $this->options = $options + $this->options;
@@ -122,7 +123,7 @@ class OAuthApi {
     /**
      * validate api required parameters
      *
-     * @throws 		github|bitbucket\api\OAuthApiException
+     * @throws      github|bitbucket\api\OAuthApiException
      */
     function validateApiCredentials() {        
         if( $this->options['api_type'] == "" || $this->options['api_path'] == "" ) {
@@ -136,10 +137,10 @@ class OAuthApi {
 
     /**
      * Send a GET|POST HTTP request for github and bitbucket Api's Library
-     * @param		array|string		$parameters		Additional parameters to send as data seperate from the url
-     * @param		string		$httpMethod		Standard HTTP/1.1 invokation method
-     * @param		array		$options		Passed-in options to override the default options
-     * @return		object						Object containing the returned web response
+     * @param       array|string    $parameters     Additional parameters to send as data seperate from the url
+     * @param       string          $httpMethod     Standard HTTP/1.1 invokation method
+     * @param       array           $options        Passed-in options to override the default options
+     * @return      object                          Object containing the returned web response
      */
     public function send($parameters = array(), $httpMethod = 'POST', array $options = array()) {
         $initialOptions = null;
@@ -162,9 +163,9 @@ class OAuthApi {
 
     /**
      * Override for {@link send()}; Sends a GET HTTP request
-     * @param		array|string		$parameters		Additional parameters to send as data seperate from the url
-     * @param		array		$options		Passed-in options to override the default options
-     * @return		object						Object containing the returned web response
+     * @param       array|string    $parameters     Additional parameters to send as data seperate from the url
+     * @param       array           $options        Passed-in options to override the default options
+     * @return      object                          Object containing the returned web response
      */
     public function get($parameters = array(), array $options = array()) {
         return $this->send( $parameters, 'GET', $options );
@@ -172,9 +173,9 @@ class OAuthApi {
 
     /**
      * Override for {@link send()}; Sends a POST HTTP request
-     * @param		array|string		$parameters		Additional parameters to send as data seperate from the url
-     * @param		array		$options		Passed-in options to override the default options
-     * @return		object						Object containing the returned web response
+     * @param       array|string    $parameters     Additional parameters to send as data seperate from the url
+     * @param       array           $options        Passed-in options to override the default options
+     * @return      object                          Object containing the returned web response
      */
     public function post($parameters = array(), array $options = array()) {
         return $this->send( $parameters, 'POST', $options );
@@ -182,18 +183,16 @@ class OAuthApi {
 
     /**
      * Decodes the JSON text into a usable PHP stdObject
-     * @param		mixed		$response		The raw HTTP response from the Github|Bitbucket API
-     * @return		object						Object containing the returned web response
+     * @param       mixed       $response       The raw HTTP response from the Github|Bitbucket API
+     * @return      object                      Object containing the returned web response
      *
-     * @throws 		github|bitbucket\api\OAuthApiException
+     * @throws      github|bitbucket\api\OAuthApiException
      */
     protected function decodeResponse($response) {
         $response_obj = null;
         if ( $this->options['format'] === 'object' && ( is_object($response) || is_string($response) ) ) {
             $response_obj = json_decode( $response, false );
         }
-
-        //header ("Content-Type: {$this->_content_type}");
 
         return $response_obj;
 
@@ -202,11 +201,11 @@ class OAuthApi {
 
     /**
      * Sends all set parameters to the API url
-     * @param		array|string		$parameters		Additional parameters to send as data seperate from the url
-     * @param		string		$httpMethod		Standard HTTP/1.1 invokation method
-     * @return		mixed
+     * @param       array|string    $parameters     Additional parameters to send as data seperate from the url
+     * @param       string          $httpMethod     Standard HTTP/1.1 invokation method
+     * @return      mixed
      *
-     * @throws github|bitbucket\api\OAuthApiException
+     * @throws      github|bitbucket\api\OAuthApiException
      */
     public function doSend($parameters = array(), $httpMethod = 'POST') {
         $this->updateHistory();
@@ -219,73 +218,8 @@ class OAuthApi {
 
         $currentOptions = $currentOptions + $this->options;
 
-        // Set Api's url based on passed api type
-        if($this->options['api_type'] == 'github') {
-            $opt_url = $this->options['github_url'];
-            if(isset($parameters['desc'])) {
-                $parameters['body'] = $parameters['desc'];
-                unset($parameters['desc']);
-            }
-            $queryString = json_encode($parameters);
-        } else if($this->options['api_type'] == 'bitbucket') {
-            if(isset($parameters['desc'])) {
-                $parameters['content'] = $parameters['desc'];
-                unset($parameters['desc']);
-            }
-            $opt_url = $this->options['bitbucket_url'];
-        } else {
-            $this->error_handler( 'Method Not Allowed', (int)$headers['http_code'] );
-        }
-
-        // Set Api's full url along with path and format
-        $url = strtr( $opt_url, array(
-                                        ':protocol' => $this->options['protocol'],
-                                        ':path' => trim(implode( "/", array_map( 'urlencode', explode( "/", $this->options['api_path'] ) ) ), '/') . (substr($this->options['api_path'], -1) == '/' ? '/' : ''),
-                                        ':format' => $currentOptions['format']
-                                       ) );
-
-        $curlOptions = array();
-
-        if ( $currentOptions['username'] ) {
-            $curlOptions += array( CURLOPT_USERPWD => sprintf( '%s:%s', $currentOptions['username'], $currentOptions['password'] ) );
-        }
-
-        if ( ! empty( $parameters ) &&  $parameters['title'] != '') {
-            $queryString = "";
-            if($this->options['api_type'] == 'bitbucket') {
-                //Make query string for bitbucket api
-                $queryString = utf8_encode( http_build_query( $parameters, '', '&' ) );
-            } else if($this->options['api_type'] == 'github') {
-                //Make query string for github api
-                $queryString = json_encode($parameters);
-            }
-
-            //Set curl parameter based on called method
-            switch ( $httpMethod ) {
-                case 'GET':
-                    $url .= "&".$queryString;
-                    break;
-                case 'POST':
-                default:
-                    $curlOptions += array(
-                                        CURLOPT_POST => true,
-                                        CURLOPT_POSTFIELDS => $queryString,
-                                        CURLOPT_HTTPHEADER => array("Content-Length: ".strlen($queryString)."")
-                                    );
-                    break;
-            }
-        } else {
-            $this->error_handler('Title Required', (int)$headers['http_code']);
-        }
-
-        //Set curl parameter based on called method
-        $curlOptions += array(
-                            CURLOPT_URL => $url,
-                            CURLOPT_USERAGENT => $currentOptions['user_agent'],
-                            CURLOPT_RETURNTRANSFER => true,
-                            CURLOPT_TIMEOUT => $currentOptions['timeout'],
-                            CURLOPT_SSL_VERIFYPEER => PHP_OS === 'WINNT' ? false : true // If this is running on windows, assume cURL can't find the CA store
-                        );
+        //Set curl options
+        $curlOptions = $this->setCurlOptions($parameters, $currentOptions, $httpMethod);
 
         //Initialize the curl
         $curl = curl_init();
@@ -296,16 +230,9 @@ class OAuthApi {
         if ( ($response = curl_exec( $curl )) === false ) {
             $this->error_handler( 'cURL Error: ' . curl_error( $curl ), curl_errno( $curl ) );
         }
-    
-        //Check issue is posted or not
-        $response_obj = json_decode($response, false);
 
-        $res_err_mes = 'Resource not found!';
-        if($response_obj === NULL) {
-            $this->error_handler( $res_err_mes );
-        } else if(is_object($response_obj) && !isset($response_obj->title)) {
-            $this->error_handler( $res_err_mes );
-        }
+        //Validate repository issue is posted or not
+        $this->validateResponse($response);
 
         //Handle curl errors
         $headers = curl_getinfo( $curl );
@@ -358,10 +285,125 @@ class OAuthApi {
     }
 
     /**
+     * Set curl options
+     * @param       array           $parameters         The parameter option's name/desc
+     * @param       currentOptions  $currentOptions     The current option's value
+     * @return      array                               Returns curl options
+     *
+     * @throws      github|bitbucket\api\OAuthApiException
+     */
+    protected function setCurlOptions($parameters = array(), $currentOptions = array(), $httpMethod = 'POST') {
+        //Get Api's full url along with path and format
+        $url = $this->generateApiUrl($parameters, $currentOptions);
+
+        $curlOptions = array();
+        if ( $currentOptions['username'] ) {
+            $curlOptions += array( CURLOPT_USERPWD => sprintf( '%s:%s', $currentOptions['username'], $currentOptions['password'] ) );
+        }
+
+        if ( ! empty( $parameters ) &&  $parameters['title'] != '') {
+            $queryString = "";
+            if($this->options['api_type'] == 'bitbucket') {
+                //Make query string for bitbucket api
+                $queryString = utf8_encode( http_build_query( $parameters, '', '&' ) );
+            } else if($this->options['api_type'] == 'github') {
+                //Make query string for github api
+                $queryString = json_encode($parameters);
+            }
+
+            //Set curl parameter based on called method
+            switch ( $httpMethod ) {
+                case 'GET':
+                    $url .= "&".$queryString;
+                    break;
+                case 'POST':
+                default:
+                    $curlOptions += array(
+                                        CURLOPT_POST => true,
+                                        CURLOPT_POSTFIELDS => $queryString,
+                                        CURLOPT_HTTPHEADER => array("Content-Length: ".strlen($queryString)."")
+                                    );
+                    break;
+            }
+        } else {
+            $this->error_handler('Title Required', (int)$headers['http_code']);
+        }
+
+        //Set curl parameter based on called method
+        $curlOptions += array(
+                            CURLOPT_URL => $url,
+                            CURLOPT_USERAGENT => $currentOptions['user_agent'],
+                            CURLOPT_RETURNTRANSFER => true,
+                            CURLOPT_TIMEOUT => $currentOptions['timeout'],
+                            CURLOPT_SSL_VERIFYPEER => false
+                        );
+
+        return $curlOptions;
+    }
+
+    /**
+     * Generate Api's full url along with path and format
+     * Set an description in the parameters array
+     * @param       array               $parameters         The parameter option's name/desc
+     * @param       currentOptions      $currentOptions     The current option's value
+     * @return      string          Returns Api's full url
+     *
+     * @throws      github|bitbucket\api\OAuthApiException
+     */
+    protected function generateApiUrl(&$parameters, $currentOptions) {
+        // Set Api's url based on passed api type
+        if($this->options['api_type'] == 'github') {
+            $opt_url = $this->options['github_url'];
+            //Initialize description variable based on selected Api
+            if(isset($parameters['desc'])) {
+                $parameters['body'] = $parameters['desc'];
+                unset($parameters['desc']);
+            }
+        } else if($this->options['api_type'] == 'bitbucket') {
+            $opt_url = $this->options['bitbucket_url'];
+            //Initialize description variable based on selected Api
+            if(isset($parameters['desc'])) {
+                $parameters['content'] = $parameters['desc'];
+                unset($parameters['desc']);
+            }
+        } else {
+            $this->error_handler( 'Method Not Allowed', (int)$headers['http_code'] );
+        }
+
+        // Set Api's full url along with path and format
+        $url = strtr( $opt_url, array(
+                                        ':protocol' => $this->options['protocol'],
+                                        ':path' => trim(implode( "/", array_map( 'urlencode', explode( "/", $this->options['api_path'] ) ) ), '/') . (substr($this->options['api_path'], -1) == '/' ? '/' : ''),
+                                        ':format' => $currentOptions['format']
+                                       ) );
+        return $url;
+    }
+
+
+    /**
+     * Validate response
+     *
+     * @access      public
+     * @return      void
+     *
+     * @throws      github|bitbucket\api\OAuthApiException
+     */
+    public function validateResponse($response = NULL) {
+        //Check issue is posted or not
+        $response_obj = json_decode($response, false);
+        $res_err_mes = 'Resource not found!';
+        if($response_obj === NULL) {
+            $this->error_handler( $res_err_mes );
+        } else if(is_object($response_obj) && !isset($response_obj->title)) {
+            $this->error_handler( $res_err_mes );
+        }
+    }
+
+    /**
      * Set an option
-     * @param		string 			$name		The option's name/key
-     * @param		mixed 			$value		The option's value
-     * @return		Request				Returns instance of self
+     * @param       string      $name       The option's name/key
+     * @param       mixed       $value      The option's value
+     * @return      Request                 Returns instance of self
      */
     public function setOption($name, $value) {
         $this->options[$name] = $value;
@@ -370,9 +412,9 @@ class OAuthApi {
 
     /**
      * Get an option
-     * @param		string 			$name		The option's name/key
-     * @param		mixed			$default	The object that returns in the event the option doesn't exists
-     * @return 		mixed						Either the option requested or the default value specified
+     * @param       string      $name       The option's name/key
+     * @param       mixed       $default    The object that returns in the event the option doesn't exists
+     * @return      mixed                   Either the option requested or the default value specified
      */
     public function getOption($name, $default = null) {
         return isset( $this->options[$name] ) ? $this->options[$name] : $default;
@@ -380,9 +422,9 @@ class OAuthApi {
 
     /**
      * Handle execption errors
-     * @param		string 			$message		The error message
-     * @param		integer		    $code	        The error code
-     * @return 		void						    Display the error
+     * @param       string      $message        The error message
+     * @param       integer     $code           The error code
+     * @return      void                        Display the error
      */
     public function error_handler($message = null, $code = null) {
         try {

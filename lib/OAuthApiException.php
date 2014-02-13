@@ -5,6 +5,7 @@
  * @author Abhinav Saxena <abhi1704@gmail.com>
  * @version   $Id: repoapi V0.01
  * @created   2014-02-09 20:00:00
+ * @modified  2014-02-13 18:00:00
  */
 
 
@@ -82,8 +83,8 @@ class OAuthApiException extends Exception {
      * Class contructor.
      * Create an exception from instantiation of a new instance using the designated parameters.
      *
-     * @param string		$message	Custom message to send back to the output
-     * @param string|int	$code		HTTP Header response code
+     * @param string        $message    Custom message to send back to the output
+     * @param string|int    $code       HTTP Header response code
      */
     public function __construct($message = null, $code = null) {
         if ($message === null && $code !== null && array_key_exists( (int)$code, self::$statusCodes)) {
