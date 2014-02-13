@@ -86,12 +86,12 @@ class createIssue {
     public function __construct(array $argv = array()) {
         //verify should be only access by command line
         if (PHP_SAPI !== 'cli') {
-            die( 'This file can be only run by command line' );
+            die( PHP_EOL .'This file can be only run by command line'. PHP_EOL );
         }
 
         //check register_argc_argv is enable
         if(count($argv) == 0) {
-            die( 'Enable register_argc_argv in php.ini' );
+            die( PHP_EOL .'Enable register_argc_argv in php.ini'. PHP_EOL );
         }
 
         // Assign passed arguments into variables
@@ -99,7 +99,11 @@ class createIssue {
 
         if($this->OAuthApi == null) {
             //create object of OAuthApi
-            $this->oauthApi = new OAuthApi($this->repo_url, $this->username, $this->password);
+            if(class_exists('OAuthApi')) {
+                $this->oauthApi = new OAuthApi($this->repo_url, $this->username, $this->password);
+            } else {
+                die( PHP_EOL .'OAuthApi class not exists'. PHP_EOL );
+            }
         }
     }
 
